@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>속담 탐험대 | 속담 퀴즈</title>
+<style>
+  :root { --ink:#263238; --muted:#687780; --paper:#fffdf8; --line:#e8e4dc; --green:#2f6b58; --mint:#e4f3eb; --orange:#f2a65a; --pink:#f8e7e2; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family: "Pretendard", "Noto Sans KR", system-ui, sans-serif; background:linear-gradient(145deg,#f3f8f1,#fff8ef); color:var(--ink); min-height:100vh; padding:24px 14px 40px; }
+  .app { max-width:760px; margin:0 auto; }
+  header { text-align:center; padding:18px 12px 22px; }
+  .eyebrow { display:inline-block; background:#e4f3eb; color:var(--green); font-size:12px; font-weight:800; letter-spacing:.08em; border-radius:99px; padding:7px 12px; }
+  h1 { font-size:clamp(30px,6vw,46px); margin:14px 0 8px; letter-spacing:-.05em; }
+  header p { margin:0; color:var(--muted); line-height:1.6; }
+  .card { background:rgba(255,255,255,.94); border:1px solid var(--line); border-radius:24px; box-shadow:0 12px 34px #344b3b0d; padding:clamp(20px,5vw,34px); }
+  .topline { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:20px; color:var(--muted); font-size:14px; font-weight:700; }
+  .progress { height:8px; background:#edf0eb; border-radius:99px; overflow:hidden; margin-bottom:26px; }
+  .progress span { display:block; height:100%; width:0; background:var(--green); border-radius:99px; transition:width .25s; }
+  .category { color:var(--green); font-size:13px; font-weight:800; margin-bottom:10px; }
+  .question { font-size:clamp(21px,4.8vw,29px); font-weight:850; line-height:1.45; letter-spacing:-.035em; margin:0 0 24px; word-break:keep-all; }
+  .options { display:grid; gap:11px; }
+  .option { display:flex; align-items:center; gap:13px; width:100%; text-align:left; padding:15px 16px; background:#fff; border:1.5px solid var(--line); border-radius:15px; color:var(--ink); font:inherit; font-size:16px; cursor:pointer; transition:.15s; }
+  .option:hover:not(:disabled) { border-color:#80ad98; transform:translateY(-1px); background:#fbfefb; }
+  .letter { display:grid; place-items:center; flex:0 0 31px; height:31px; border-radius:10px; background:#f2f2ed; font-weight:850; color:#64716b; }
+  .option.correct { border-color:#3e9871; background:#eaf7ef; }
+  .option.correct .letter { background:#3e9871; color:white; }
+  .option.wrong { border-color:#d97565; background:#fff0ed; }
+  .option.wrong .letter { background:#d97565; color:white; }
+  .option:disabled { cursor:default; }
+  .feedback { margin-top:17px; padding:15px 17px; border-radius:15px; line-height:1.6; display:none; }
+  .feedback.show { display:block; }
+  .feedback.good { background:var(--mint); }
+  .feedback.bad { background:var(--pink); }
+  .feedback strong { display:block; margin-bottom:3px; }
+  .actions { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-top:22px; }
+  button.primary, button.secondary { border:0; border-radius:13px; padding:13px 19px; font:inherit; font-weight:800; cursor:pointer; }
+  button.primary { background:var(--green); color:white; }
+  button.primary:hover { background:#245341; }
+  button.secondary { background:#f0f0e9; color:var(--ink); }
+  button:focus-visible { outline:3px solid #f2a65a; outline-offset:3px; }
+  .intro { text-align:center; }
+  .big-emoji { font-size:52px; margin:2px 0 12px; }
+  .intro h2, .result h2 { font-size:27px; letter-spacing:-.04em; margin:0 0 10px; }
+  .intro p, .result p { color:var(--muted); line-height:1.75; margin:0 auto 22px; max-width:480px; }
+  .rules { display:flex; justify-content:center; flex-wrap:wrap; gap:8px; margin-bottom:24px; }
+  .rules span { background:#f4f2eb; padding:8px 11px; border-radius:99px; font-size:13px; font-weight:700; }
+  .intro .primary, .result .primary { min-width:170px; }
+  .result { text-align:center; }
+  .score-circle { width:126px; height:126px; border-radius:50%; background:var(--mint); display:grid; place-items:center; margin:0 auto 20px; color:var(--green); }
+  .score-circle strong { font-size:34px; display:block; }
+  .score-circle span { font-size:12px; font-weight:800; }
+  .review { text-align:left; margin:22px 0; }
+  .review-item { border-top:1px solid var(--line); padding:13px 0; line-height:1.55; }
+  .review-item strong { display:block; margin-bottom:3px; }
+  footer { text-align:center; color:#89938d; font-size:12px; padding:20px 10px 0; }
+  @media(max-width:480px) { body { padding:12px 10px 28px; } .card { border-radius:20px; } .topline { font-size:12px; } .option { padding:13px 12px; font-size:15px; } .actions { align-items:stretch; } .actions button { flex:1; } }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <span class="eyebrow">KOREAN PROVERB QUIZ</span>
+    <h1>속담 탐험대 <span aria-hidden="true">🌱</span></h1>
+    <p>익숙한 속담부터 헷갈리는 속담까지!<br>퀴즈를 풀며 우리말 표현을 익혀 봐요.</p>
+  </header>
+
+  <main class="card" id="main" aria-live="polite">
+    <section class="intro">
+      <div class="big-emoji" aria-hidden="true">🧩</div>
+      <h2>속담 실력을 확인해 볼까요?</h2>
+      <p>총 10문제예요. 문장을 읽고 가장 알맞은 뜻이나 뒷부분을 골라 보세요. 정답을 고르면 간단한 해설도 확인할 수 있어요.</p>
+      <div class="rules"><span>📚 속담 10문제</span><span>⭐ 정답 해설 제공</span><span>⏱️ 시간 제한 없음</span></div>
+      <button class="primary" id="startBtn">퀴즈 시작하기 →</button>
+    </section>
+  </main>
+  <footer>속담 탐험대 · 우리말을 재미있게 배우는 작은 퀴즈</footer>
+</div>
+<script>
+const questions = [
+ {q:"가는 말이 고와야 ___", opts:["오는 말이 곱다","가는 길이 편하다","듣는 귀가 즐겁다","마음도 고와진다"], a:0, why:"내가 남에게 좋게 말해야 남도 나에게 좋게 말한다는 뜻이에요.", level:"1단계 · 몸풀기"},
+ {q:"‘티끌 모아 태산’과 가장 가까운 뜻은?", opts:["작은 것도 모이면 큰 것이 된다","큰일은 혼자 해야 한다","좋은 기회는 기다려야 온다","겉모습보다 속마음이 중요하다"], a:0, why:"아주 작고 사소한 것도 꾸준히 모이면 큰 결과를 이룰 수 있다는 뜻이에요.", level:"1단계 · 몸풀기"},
+ {q:"‘등잔 밑이 어둡다’가 쓰이기 알맞은 상황은?", opts:["밤길이 위험해서 손전등을 켰다","가까이 있는 단서를 못 보고 멀리서만 답을 찾았다","어두운 방에서 책을 읽었다","잘 아는 사람에게 길을 물었다"], a:1, why:"가까이에 있는 것을 오히려 알아차리지 못하거나 놓치는 상황을 말해요.", level:"2단계 · 기본 응용"},
+ {q:"‘호미로 막을 것을 가래로 막는다’의 뜻은?", opts:["작은 문제를 초기에 해결하지 않아 큰 수고를 하게 된다","일을 서두르면 실수가 생긴다","도구가 많을수록 일이 쉬워진다","힘든 일은 여럿이 나누어야 한다"], a:0, why:"처음에는 쉽게 해결할 수 있었던 일을 미루다가 나중에 더 큰 노력과 비용을 들이게 된다는 뜻이에요.", level:"2단계 · 기본 응용"},
+ {q:"‘언 발에 오줌 누기’에 가장 잘 어울리는 상황은?", opts:["추운 날 따뜻한 양말을 신었다","당장의 곤란함은 잠깐 덜었지만 결국 상황이 더 나빠졌다","문제를 미리 예방해 큰 피해를 막았다","오래 참았던 일을 한꺼번에 해결했다"], a:1, why:"잠깐 효과가 있는 듯하지만 결국에는 상황을 더 나쁘게 만드는 임시방편을 뜻해요.", level:"3단계 · 의미 추론"},
+ {q:"‘구더기 무서워 장 못 담글까’가 전하는 태도는?", opts:["작은 위험이나 방해가 있어도 해야 할 일은 해야 한다","위험이 조금이라도 있으면 포기해야 한다","다른 사람의 허락을 먼저 받아야 한다","일을 시작하기 전에 완벽한 조건을 갖춰야 한다"], a:0, why:"일을 하다 보면 작은 어려움이나 방해가 있더라도, 그것이 두려워 꼭 해야 할 일을 포기해서는 안 된다는 뜻이에요.", level:"3단계 · 의미 추론"},
+ {q:"‘똥 묻은 개가 겨 묻은 개 나무란다’는 어떤 경우를 비판할까요?", opts:["자신의 잘못은 더 크면서 남의 작은 잘못을 탓하는 경우","실수한 친구를 조용히 도와주는 경우","잘못을 인정하고 사과하는 경우","남의 장점을 배우려는 경우"], a:0, why:"자기에게 더 큰 흠이 있으면서 남의 작은 흠을 비난하는 태도를 꼬집는 속담이에요.", level:"4단계 · 고난도"},
+ {q:"‘되로 주고 말로 받는다’의 의미로 가장 알맞은 것은?", opts:["작게 베풀고 큰 도움을 돌려받는다","조금 준 것이 몇 배로 돌아오거나, 작은 행동에 큰 보복을 당한다","빌린 만큼 정확하게 갚는다","아무런 대가 없이 남을 돕는다"], a:1, why:"적은 양을 주고 더 많은 양을 받는다는 뜻으로, 문맥에 따라 작은 행동에 큰 보답이나 보복이 돌아오는 상황에 쓰여요.", level:"4단계 · 고난도"},
+ {q:"‘아니 땐 굴뚝에 연기 나랴’의 의미를 가장 정확하게 설명한 것은?", opts:["소문은 언제나 사실이다","어떤 결과나 소문에는 대개 그럴 만한 원인이 있다","증거가 없어도 남을 의심해야 한다","일이 잘되려면 운이 따라야 한다"], a:1, why:"연기가 나려면 불을 때야 하듯, 어떤 일이 생기거나 소문이 퍼지는 데에는 대체로 그럴 만한 원인이 있다는 뜻이에요. 다만 소문이 항상 사실이라는 뜻은 아니에요.", level:"5단계 · 도전"},
+ {q:"친구가 실수할까 봐 작은 발표 기회도 계속 피하다가 결국 발표 경험을 쌓지 못했다. 이 상황에 가장 어울리는 속담은?", opts:["벼는 익을수록 고개를 숙인다","구더기 무서워 장 못 담글까","백지장도 맞들면 낫다","원숭이도 나무에서 떨어진다"], a:1, why:"작은 어려움이나 실패가 두려워 필요한 시도 자체를 포기한 상황이므로 ‘구더기 무서워 장 못 담글까’가 가장 알맞아요.", level:"5단계 · 종합 도전"}
+];
+let order=[], index=0, score=0, answered=false, records=[];
+const main=document.getElementById('main');
+const letters=['A','B','C','D'];
+function shuffle(arr){return [...arr].sort(()=>Math.random()-.5);}
+function startQuiz(){
+ order=shuffle(questions); index=0; score=0; answered=false; records=[]; renderQuestion();
+}
+function renderQuestion(){
+ answered=false; const item=order[index];
+ main.innerHTML=`<div class="topline"><span>QUESTION ${index+1} / ${order.length}</span><span>⭐ ${score}점</span></div>
+ <div class="progress" role="progressbar" aria-label="퀴즈 진행률" aria-valuenow="${index}" aria-valuemin="0" aria-valuemax="${order.length}"><span style="width:${index/order.length*100}%"></span></div>
+ <div class="category">${item.level}</div>
+ <h2 class="question">${item.q}</h2>
+ <div class="options">${item.opts.map((o,i)=>`<button class="option" data-choice="${i}"><span class="letter">${letters[i]}</span><span>${o}</span></button>`).join('')}</div>
+ <div class="feedback" id="feedback" role="status"></div>
+ <div class="actions"><span style="color:var(--muted);font-size:13px;align-self:center">정답을 선택해 주세요.</span><button class="primary" id="nextBtn" disabled>${index===order.length-1?'결과 보기':'다음 문제 →'}</button></div>`;
+ main.querySelectorAll('.option').forEach(btn=>btn.addEventListener('click',()=>choose(Number(btn.dataset.choice))));
+ document.getElementById('nextBtn').addEventListener('click',()=>{if(!answered)return; index++; if(index<order.length)renderQuestion();else renderResult();});
+}
+function choose(choice){
+ if(answered)return; answered=true;
+ const item=order[index], correct=choice===item.a; if(correct)score++;
+ records.push({q:item.q, chosen:item.opts[choice], answer:item.opts[item.a], correct, why:item.why});
+ main.querySelectorAll('.option').forEach((btn,i)=>{btn.disabled=true;if(i===item.a)btn.classList.add('correct');else if(i===choice)btn.classList.add('wrong');});
+ const f=document.getElementById('feedback'); f.className='feedback show '+(correct?'good':'bad');
+ f.innerHTML=`<strong>${correct?'🎉 정답이에요!':'💡 아쉬워요! 정답을 확인해 봐요.'}</strong>${item.why}`;
+ document.getElementById('nextBtn').disabled=false;
+ main.querySelector('.actions span').textContent=correct?'잘했어요!':'다음 문제에서 다시 도전해 봐요.';
+}
+function renderResult(){
+ const percent=score/questions.length*100;
+ const message=score>=9?'속담 박사! 정말 대단해요.':score>=7?'훌륭해요! 속담을 잘 알고 있네요.':score>=5?'좋아요! 조금만 더 익히면 완벽해요.':'괜찮아요. 해설을 읽고 다시 도전해 봐요!';
+ main.innerHTML=`<section class="result"><div class="big-emoji">${score>=8?'🏆':score>=5?'🌟':'🌱'}</div><div class="score-circle"><div><strong>${score}/10</strong><span>YOUR SCORE</span></div></div><h2>${message}</h2><p>퀴즈를 끝까지 풀었어요. 틀린 문제의 해설을 읽으며 속담을 복습해 보세요.</p>
+ <div class="review">${records.filter(r=>!r.correct).length?records.filter(r=>!r.correct).map(r=>`<div class="review-item"><strong>❌ ${r.q}</strong><div>정답: ${r.answer}</div><div style="color:var(--muted);font-size:14px">${r.why}</div></div>`).join(''):'<div class="review-item"><strong>모든 문제를 맞혔어요! 🎉</strong><div>완벽한 결과예요. 새로운 속담도 알아볼까요?</div></div>'}</div>
+ <button class="primary" id="retryBtn">다시 도전하기 ↻</button></section>`;
+ document.getElementById('retryBtn').addEventListener('click',startQuiz);
+}
+document.getElementById('startBtn').addEventListener('click',startQuiz);
+</script>
+</body>
+</html>
